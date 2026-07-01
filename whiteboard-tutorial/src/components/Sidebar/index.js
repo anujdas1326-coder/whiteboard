@@ -44,7 +44,7 @@ const Sidebar = () => {
       console.error("Error creating canvas:", error);
       return null;
     }
-  }, [token, setCanvasId, handleCanvasClick]);
+  }, [token, canvasId, setCanvasId, handleCanvasClick]);
 
   const fetchCanvases = useCallback(async () => {
     try {
