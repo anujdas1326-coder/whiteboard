@@ -22,11 +22,11 @@ const Sidebar = () => {
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
 
-  const handleCanvasClick = (id) => {
+  const handleCanvasClick = useCallback((id) => {
     navigate(`/${id}`);
-  };
+  }, [navigate]);
 
-  const handleCreateCanvas = async () => {
+  const handleCreateCanvas = useCallback(async () => {
     try {
       const response = await axios.post(
         "https://api-whiteboard-az.onrender.com/api/canvas/create",
@@ -44,7 +44,7 @@ const Sidebar = () => {
       console.error("Error creating canvas:", error);
       return null;
     }
-  };
+  }, [token, setCanvasId, handleCanvasClick]);
 
   const fetchCanvases = useCallback(async () => {
     try {
@@ -70,7 +70,7 @@ const Sidebar = () => {
     } catch (error) {
       console.error("Error fetching canvases:", error);
     }
-  }, [token, canvasId, id, setCanvasId]);
+  }, [token, id, handleCreateCanvas, setCanvasId, handleCanvasClick]);
 
   useEffect(() => {
     if (isUserLoggedIn) {

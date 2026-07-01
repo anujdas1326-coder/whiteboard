@@ -39,55 +39,55 @@ function Board({ id }) {
   const [isAuthorized, setIsAuthorized] = useState(true);
 
   useEffect(() => {
-  if (!id) return;
+    if (!id) return;
 
-  socket.emit("joinCanvas", { canvasId: id });
+    socket.emit("joinCanvas", { canvasId: id });
 
-  socket.on("receiveDrawingUpdate", (updatedElements) => {
-    setElements(updatedElements);
-  });
+    socket.on("receiveDrawingUpdate", (updatedElements) => {
+      setElements(updatedElements);
+    });
 
-  socket.on("loadCanvas", (initialElements) => {
-    setElements(initialElements);
-  });
+    socket.on("loadCanvas", (initialElements) => {
+      setElements(initialElements);
+    });
 
-  socket.on("unauthorized", (data) => {
-    console.log(data.message);
-    alert("Access Denied: You cannot edit this canvas.");
-    setIsAuthorized(false);
-  });
+    socket.on("unauthorized", (data) => {
+      console.log(data.message);
+      alert("Access Denied: You cannot edit this canvas.");
+      setIsAuthorized(false);
+    });
 
-  return () => {
-    socket.off("receiveDrawingUpdate");
-    socket.off("loadCanvas");
-    socket.off("unauthorized");
-  };
-}, [id, setElements]);
+    return () => {
+      socket.off("receiveDrawingUpdate");
+      socket.off("loadCanvas");
+      socket.off("unauthorized");
+    };
+  }, [id, setElements]);
 
-useEffect(() => {
-  const fetchCanvasData = async () => {
-    if (!id || !token) return;
+  useEffect(() => {
+    const fetchCanvasData = async () => {
+      if (!id || !token) return;
 
-    try {
-      const response = await axios.get(
-        `https://whiteboard1-3knl.onrender.com/api/canvas/load/${id}`,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
+      try {
+        const response = await axios.get(
+          `https://whiteboard1-3knl.onrender.com/api/canvas/load/${id}`,
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        );
 
-      setCanvasId(id);
-      setElements(response.data.elements);
-      setHistory(response.data.elements);
-    } catch (error) {
-      console.error("Error loading canvas:", error);
-    }
-  };
+        setCanvasId(id);
+        setElements(response.data.elements);
+        setHistory(response.data.elements);
+      } catch (error) {
+        console.error("Error loading canvas:", error);
+      }
+    };
 
-  fetchCanvasData();
-}, [id, token, setCanvasId, setElements, setHistory]);
+    fetchCanvasData();
+  }, [id, token, setCanvasId, setElements, setHistory]);
 
   useEffect(() => {
     const canvas = canvasRef.current;
