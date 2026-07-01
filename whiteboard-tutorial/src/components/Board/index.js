@@ -39,53 +39,55 @@ function Board({ id }) {
   const [isAuthorized, setIsAuthorized] = useState(true);
 
   useEffect(() => {
-    if (id) {
-      // Join the canvas room (no need for userId)
-      socket.emit("joinCanvas", { canvasId: id });
+  if (!id) return;
 
-      // Listen for updates from other users
-      socket.on("receiveDrawingUpdate", (updatedElements) => {
-        setElements(updatedElements);
-      });
+  socket.emit("joinCanvas", { canvasId: id });
 
-      // Load initial canvas data
-      socket.on("loadCanvas", (initialElements) => {
-        setElements(initialElements);
-      });
+  socket.on("receiveDrawingUpdate", (updatedElements) => {
+    setElements(updatedElements);
+  });
 
-      socket.on("unauthorized", (data) => {
-        console.log(data.message);
-        alert("Access Denied: You cannot edit this canvas.");
-        setIsAuthorized(false);
-      });
+  socket.on("loadCanvas", (initialElements) => {
+    setElements(initialElements);
+  });
 
-      return () => {
-        socket.off("receiveDrawingUpdate");
-        socket.off("loadCanvas");
-        socket.off("unauthorized");
-      };
-    }
-  }, [id]);
+  socket.on("unauthorized", (data) => {
+    console.log(data.message);
+    alert("Access Denied: You cannot edit this canvas.");
+    setIsAuthorized(false);
+  });
 
-  useEffect(() => {
-    const fetchCanvasData = async () => {
-      if (id && token) {
-        try {
-          const response = await axios.get(`https://api-whiteboard-az.onrender.com/api/canvas/load/${id}`, {
-            headers: { Authorization: `Bearer ${token}` },
-          });
-          setCanvasId(id); // Set the current canvas ID
-          setElements(response.data.elements); // Set the fetched elements
-          setHistory(response.data.elements); // Set the fetched elements
-        } catch (error) {
-          console.error("Error loading canvas:", error);
-        } finally {
+  return () => {
+    socket.off("receiveDrawingUpdate");
+    socket.off("loadCanvas");
+    socket.off("unauthorized");
+  };
+}, [id, setElements]);
+
+useEffect(() => {
+  const fetchCanvasData = async () => {
+    if (!id || !token) return;
+
+    try {
+      const response = await axios.get(
+        `https://whiteboard1-3knl.onrender.com/api/canvas/load/${id}`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
         }
-      }
-    };
+      );
 
-    fetchCanvasData();
-  }, [id, token]);
+      setCanvasId(id);
+      setElements(response.data.elements);
+      setHistory(response.data.elements);
+    } catch (error) {
+      console.error("Error loading canvas:", error);
+    }
+  };
+
+  fetchCanvasData();
+}, [id, token, setCanvasId, setElements, setHistory]);
 
   useEffect(() => {
     const canvas = canvasRef.current;
